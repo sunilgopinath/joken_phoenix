@@ -15,5 +15,18 @@ defmodule JokenPhoenix.LoginController do
     render(conn, "login.json", token: token)
   end
 
+  def admin(conn, _params) do
+    token = %Joken.Token{}
+    |> with_claims(%{role: "admin"})
+    |> with_aud(config[:app_id])
+    |> with_iss(config[:app_baseurl])
+    |> with_exp
+    |> with_iat
+    |> sign(hs256(config[:app_secret]))
+    |> get_compact
+
+    render(conn, "login.json", token: token)
+  end
+
   defp config, do: Application.get_env(:joken_phoenix, :auth0)
 end
